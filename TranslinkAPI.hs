@@ -1,30 +1,33 @@
 -- API Key: qwRjMjGRk9PMqJklKOPK
+import Data.Maybe
 
+data LatLon = LatLon Float Float deriving (Show)
 
 -- temporary solution until we implement fetching of current location
-getUserLocation = [49.279171, -122.919808]
+userLocation = LatLon 49.279171 (-122.919808)
 
--- getLatLon returns [Lat,Lon] accordingly, if "my location" is passed in, the current location is fetched
--- if location passed in is unfamiliar, return an empty array
-getLatLon :: [Char] -> [Double]
+-- Returns a Maybe LatLon
+-- Is Just LatLon if a valid specification specified
+-- Nothing if an invalid location specified
+getLatLon :: [Char] -> Maybe LatLon
 getLatLon poi
-    | poi == "ICICS" = [49.260986, -123.248064]
-    | poi == "city hall" = [49.263248, -123.114934]
-    | poi == "nest" = [49.266502, -123.249666]
-    | poi == "BCIT" = [49.249149, -123.001068]
-    | poi == "SFU" = [49.279171, -122.919808]
-    | poi == "my location" = getUserLocation
-    | otherwise = []
-
+    | poi == "ICICS" = Just (LatLon 49.260986 (-123.248064))
+    | poi == "city hall" = Just (LatLon 49.263248 (-123.114934))
+    | poi == "nest" = Just (LatLon 49.266502 (-123.249666))
+    | poi == "BCIT" = Just (LatLon 49.249149 (-123.001068))
+    | poi == "SFU" = Just (LatLon 49.279171 (-122.919808))
+    | poi == "my location" = Just userLocation
+    | otherwise = Nothing
 
 main = do
 putStrLn "Please enter a location:"
 pointOfInterest <- getLine
 -- get lat lon of the entered poi
-let latLon = getLatLon pointOfInterest
-putStrLn $ show (head latLon)
-putStrLn $ show (latLon!!1)
-
+let possibleLatLon = getLatLon pointOfInterest
+if isJust possibleLatLon then
+    putStrLn $ show (fromJust possibleLatLon)
+else
+    putStrLn $ "Invalid location specified"
 
 
 {- just for reference - ignore for now
