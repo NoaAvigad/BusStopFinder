@@ -1,7 +1,9 @@
 -- API Key: qwRjMjGRk9PMqJklKOPK
 import Data.Maybe
 
-data LatLon = LatLon Float Float deriving (Show)
+data LatLon = LatLon Float Float
+instance Show LatLon where
+    show (LatLon lat lon) = "Lat:" ++ show (lat) ++ " Lon:" ++ show (lon)
 
 -- temporary solution until we implement fetching of current location
 userLocation = LatLon 49.279171 (-122.919808)
