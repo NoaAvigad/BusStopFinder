@@ -1,7 +1,41 @@
--- API Key: qwRjMjGRk9PMqJklKOPK
+module TranslinkAPI where
+
 import Data.Maybe
+import Data.Aeson
+import Network.HTTP
+import Network.HTTP.Base
+import Network.HTTP.Headers
+import Network.Stream
+import Network.URI
+
+apiKey = "qwRjMjGRk9PMqJklKOPK" 
+
 
 data LatLon = LatLon Float Float deriving (Show)
+
+type Radius = Float
+
+type Accessible = Bool 
+type Name = [Char]
+type Distance = Float
+type Route = [Char]
+data BusStop = BusStop Name LatLon Distance [Route] Accessible deriving (Show) 
+
+getBusStopJSON :: LatLon -> Radius -> IO String
+getBusStopJSON (LatLon lat lon) radius = do
+    -- TODO: What if this fails?
+    let uri = fromJust (parseURI ("http://api.translink.ca/rttiapi/v1/stops?" ++
+                                "apikey=" ++ apiKey ++ 
+                                "&lat=" ++ show lat ++ 
+                                "&long=" ++ show lon))
+    let jsonHeader = mkHeader HdrContentType "application/json"
+    let request = Request {
+        rqURI=uri,
+        rqMethod=GET,
+        rqHeaders=[jsonHeader],
+        rqBody=""
+    } 
+    simpleHTTP request >>= getResponseBody
 
 -- temporary solution until we implement fetching of current location
 userLocation = LatLon 49.279171 (-122.919808)
@@ -19,15 +53,17 @@ getLatLon poi
     | poi == "my location" = Just userLocation
     | otherwise = Nothing
 
-main = do
-putStrLn "Please enter a location:"
-pointOfInterest <- getLine
--- get lat lon of the entered poi
-let possibleLatLon = getLatLon pointOfInterest
-if isJust possibleLatLon then
-    putStrLn $ show (fromJust possibleLatLon)
-else
-    putStrLn $ "Invalid location specified"
+
+-- TODO: We can probably either move this section to main, or just remove it entirely
+--main = do
+--putStrLn "Please enter a location:"
+--pointOfInterest <- getLine
+---- get lat lon of the entered poi
+--let possibleLatLon = getLatLon pointOfInerest
+--if isJust possibleLatLon then
+--    putStrLn $ show (fromJust possibleLatLon)
+--else
+--    putStrLn $ "Invalid location specified"
 
 
 {- just for reference - ignore for now
