@@ -1,2 +1,6 @@
 dist
 dist/
+*.hi
+*.o
+TranslinkAPI
+Main
