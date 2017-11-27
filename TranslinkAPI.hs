@@ -1,5 +1,6 @@
 -- API Key: qwRjMjGRk9PMqJklKOPK
 import Data.Maybe
+import System.IO
 
 data LatLon = LatLon Float Float deriving (Show)
 
@@ -20,6 +21,7 @@ getLatLon poi
     | otherwise = Nothing
 
 main = do
+hSetBuffering stdout NoBuffering
 putStrLn "Please enter a location:"
 pointOfInterest <- getLine
 -- get lat lon of the entered poi
