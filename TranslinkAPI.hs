@@ -6,7 +6,7 @@ import Data.Maybe
 import Data.Either
 import Data.Aeson
 import Data.Aeson.Types
-import Data.Text
+import Data.Text hiding (foldr)
 import Network.HTTP
 import Network.HTTP.Base
 import Network.HTTP.Headers
@@ -82,9 +82,6 @@ storeBusStopList = do
     B.writeFile "stop1.json" (encode h)
     B.writeFile "stops.json" jsonString
 
-getBusStopListFromEither busStops
-    | isRight busStops = fromRight busStops
-
 getBusStopList = do
     byteString <- B.readFile "stops.json"
     let busStops = decode byteString :: Maybe [Stop]
@@ -94,6 +91,14 @@ getBusStopList = do
 checkBusStops busStops 
     | isJust busStops = fromJust busStops
     | otherwise = []
+
+queryBusStopByStopNumber :: p -> Int -> IO()
+queryBusStopByStopNumber paramName paramVal = do
+    byteString <- B.readFile "stops.json"
+    let busStops = decode byteString :: Maybe [Stop]
+    let busStoplist = checkBusStops busStops
+    let val = foldr (\x acc -> if (stopNumber x == paramVal) then x : acc else acc) [] busStoplist
+    B.writeFile "answer.json" (encode val)
 
 -- temporary solution until we implement fetching of current location
 userLocation = LatLon 49.279171 (-122.919808)
