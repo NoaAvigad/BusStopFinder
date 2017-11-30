@@ -14,10 +14,10 @@ import Network.URI
 import GHC.Generics
 import qualified Data.ByteString.Lazy as B
 
+import GeoLocation
+
 apiKey = "qwRjMjGRk9PMqJklKOPK" 
 
-
-data LatLon = LatLon Float Float deriving (Show)
 
 type Radius = Float
 
