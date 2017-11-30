@@ -1,3 +1,5 @@
+import TranslinkAPI
+
 module Main where
 
 main :: IO ()
