@@ -1,12 +1,19 @@
+{-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
+
 module TranslinkAPI where
 
 import Data.Maybe
+import Data.Either
 import Data.Aeson
+import Data.Aeson.Types
+import Data.Text
 import Network.HTTP
 import Network.HTTP.Base
 import Network.HTTP.Headers
 import Network.Stream
 import Network.URI
+import GHC.Generics
+import qualified Data.ByteString.Lazy as B
 
 apiKey = "qwRjMjGRk9PMqJklKOPK" 
 
@@ -21,7 +28,37 @@ type Distance = Float
 type Route = [Char]
 data BusStop = BusStop Name LatLon Distance [Route] Accessible deriving (Show) 
 
-getBusStopJSON :: LatLon -> Radius -> IO String
+data Stop = 
+    Stop { stopNumber :: Int
+        , name :: Text
+        , bayNumber :: Text
+        , city :: Text
+        , onStreet :: Text
+        , atStreet :: Text
+        , latitude :: Float
+        , longitude :: Float
+        , wheelChairAccess :: Int
+        , distance :: Float
+        , routes :: Text
+    } deriving (Show, Generic)
+
+instance FromJSON Stop where
+  parseJSON (Object v) = 
+    Stop <$> v .: "StopNo" 
+         <*> v .: "Name" 
+         <*> v .: "BayNo"
+         <*> v .: "City"
+         <*> v .: "OnStreet"
+         <*> v .: "AtStreet"
+         <*> v .: "Latitude"
+         <*> v .: "Longitude"
+         <*> v .: "WheelchairAccess"
+         <*> v .: "Distance"
+         <*> v .: "Routes"
+
+instance ToJSON Stop
+
+getBusStopJSON :: LatLon -> Radius -> IO B.ByteString
 getBusStopJSON (LatLon lat lon) radius = do
     -- TODO: What if this fails?
     let uri = fromJust (parseURI ("http://api.translink.ca/rttiapi/v1/stops?" ++
@@ -36,6 +73,27 @@ getBusStopJSON (LatLon lat lon) radius = do
         rqBody=""
     } 
     simpleHTTP request >>= getResponseBody
+
+storeBusStopList = do
+    jsonString <- getBusStopJSON userLocation 2000
+-- 	let busStops = eitherDecode jsonString :: Either String [Stop]
+    let busStops = decode jsonString :: Maybe [Stop]
+    let (h:t) = checkBusStops busStops
+    B.writeFile "stop1.json" (encode h)
+    B.writeFile "stops.json" jsonString
+
+getBusStopListFromEither busStops
+    | isRight busStops = fromRight busStops
+
+getBusStopList = do
+    byteString <- B.readFile "stops.json"
+    let busStops = decode byteString :: Maybe [Stop]
+    let (h:t) = checkBusStops busStops
+    B.writeFile "test.json" (encode h)
+
+checkBusStops busStops 
+    | isJust busStops = fromJust busStops
+    | otherwise = []
 
 -- temporary solution until we implement fetching of current location
 userLocation = LatLon 49.279171 (-122.919808)
