@@ -3,7 +3,6 @@
 module TranslinkAPI where
 
 import Data.Maybe
-import Data.Either
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Text hiding (foldr)
@@ -74,31 +73,31 @@ getBusStopJSON (LatLon lat lon) radius = do
     } 
     simpleHTTP request >>= getResponseBody
 
+-- Makes a JSON request using the user location and radius and stores the result of the request into a JSON file called "stops.json"
+storeBusStopList :: IO()
 storeBusStopList = do
     jsonString <- getBusStopJSON userLocation 2000
--- 	let busStops = eitherDecode jsonString :: Either String [Stop]
-    let busStops = decode jsonString :: Maybe [Stop]
-    let (h:t) = checkBusStops busStops
-    B.writeFile "stop1.json" (encode h)
     B.writeFile "stops.json" jsonString
 
-getBusStopList = do
-    byteString <- B.readFile "stops.json"
-    let busStops = decode byteString :: Maybe [Stop]
-    let (h:t) = checkBusStops busStops
-    B.writeFile "test.json" (encode h)
-
+-- Converts between a Maybe [Stop] to a [Stop]
+checkBusStops :: Maybe [Stop] -> [Stop]
 checkBusStops busStops 
     | isJust busStops = fromJust busStops
     | otherwise = []
 
+queryBusStop :: (Eq t) => Stop -> (Stop -> t) -> t -> Bool
+queryBusStop stop f paramVal
+    | f stop == paramVal = True
+    | otherwise = False
+
+-- Gets all of the stops with the given stop number and prints the list of stops to the screen
 queryBusStopByStopNumber :: p -> Int -> IO()
 queryBusStopByStopNumber paramName paramVal = do
     byteString <- B.readFile "stops.json"
     let busStops = decode byteString :: Maybe [Stop]
     let busStoplist = checkBusStops busStops
     let val = foldr (\x acc -> if (stopNumber x == paramVal) then x : acc else acc) [] busStoplist
-    B.writeFile "answer.json" (encode val)
+    putStrLn (show val)
 
 -- temporary solution until we implement fetching of current location
 userLocation = LatLon 49.279171 (-122.919808)
