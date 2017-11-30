@@ -21,14 +21,8 @@ data LatLon = LatLon Float Float deriving (Show)
 
 type Radius = Float
 
-type Accessible = Bool 
-type Name = [Char]
-type Distance = Float
-type Route = [Char]
-data BusStop = BusStop Name LatLon Distance [Route] Accessible deriving (Show) 
-
-data Stop = 
-    Stop { stopNumber :: Int
+data BusStop = 
+    BusStop { stopNumber :: Int
         , name :: Text
         , bayNumber :: Text
         , city :: Text
@@ -41,9 +35,9 @@ data Stop =
         , routes :: Text
     } deriving (Show, Generic)
 
-instance FromJSON Stop where
+instance FromJSON BusStop where
   parseJSON (Object v) = 
-    Stop <$> v .: "StopNo" 
+    BusStop <$> v .: "StopNo" 
          <*> v .: "Name" 
          <*> v .: "BayNo"
          <*> v .: "City"
@@ -55,7 +49,7 @@ instance FromJSON Stop where
          <*> v .: "Distance"
          <*> v .: "Routes"
 
-instance ToJSON Stop
+instance ToJSON BusStop
 
 getBusStopJSON :: LatLon -> Radius -> IO B.ByteString
 getBusStopJSON (LatLon lat lon) radius = do
@@ -79,13 +73,13 @@ storeBusStopList = do
     jsonString <- getBusStopJSON userLocation 2000
     B.writeFile "stops.json" jsonString
 
--- Converts between a Maybe [Stop] to a [Stop]
-checkBusStops :: Maybe [Stop] -> [Stop]
+-- Converts between a Maybe [BusStop] to a [BusStop]
+checkBusStops :: Maybe [BusStop] -> [BusStop]
 checkBusStops busStops 
     | isJust busStops = fromJust busStops
     | otherwise = []
 
-queryBusStop :: (Eq t) => Stop -> (Stop -> t) -> t -> Bool
+queryBusStop :: (Eq t) => BusStop -> (BusStop -> t) -> t -> Bool
 queryBusStop stop f paramVal
     | f stop == paramVal = True
     | otherwise = False
@@ -94,7 +88,7 @@ queryBusStop stop f paramVal
 queryBusStopByStopNumber :: p -> Int -> IO()
 queryBusStopByStopNumber paramName paramVal = do
     byteString <- B.readFile "stops.json"
-    let busStops = decode byteString :: Maybe [Stop]
+    let busStops = decode byteString :: Maybe [BusStop]
     let busStoplist = checkBusStops busStops
     let val = foldr (\x acc -> if (stopNumber x == paramVal) then x : acc else acc) [] busStoplist
     putStrLn (show val)
