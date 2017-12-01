@@ -34,6 +34,10 @@ data BusStop =
         , routes :: Text
     } deriving (Show, Generic)
 
+-- instance Show BusStop where
+--     show busStop = show (name busStop)
+--     showList busStops = showString (Prelude.unlines (Prelude.map show busStops))
+
 instance FromJSON BusStop where
   parseJSON (Object v) = 
     BusStop <$> v .: "StopNo" 
@@ -48,24 +52,21 @@ instance FromJSON BusStop where
          <*> v .: "Distance"
          <*> v .: "Routes"
 
-instance ToJSON BusStop
+instance ToJSON BusStop where
 
-type Name = String
-data Location = Location Name LatLon
-
-locationListAsString :: [Location] -> Int -> String
-locationListAsString [] _ = ""
-locationListAsString ((Location name _):xs) index = "(" ++ (show index) ++ ") " ++ name
-                                            ++ "\n" ++ locationListAsString xs (index+1)
+data Location = Location {
+          locationName :: String,
+          locationLatLon :: LatLon
+    } deriving (Show)
 
 knownLocations :: [Location]
 knownLocations = [
         Location "ICICS" (LatLon 49.260986 (-123.248064)),
-        Location "City Hall" (LatLon 49.263248 (-123.114934))
+        Location "City Hall" (LatLon 49.263248 (-123.114934)),
+        Location "UBC Nest" (LatLon 49.266502 (-123.249666)),
+        Location "BCIT" (LatLon 49.249149 (-123.001068)),
+        Location "SFU" (LatLon 49.279171 (-122.919808))
     ]
-
--- instance Show [Location] where
---     show (location:xs) = (show location) ++ "\n"
 
 getBusStopJSON :: LatLon -> Radius -> IO B.ByteString
 getBusStopJSON (LatLon lat lon) radius = do
@@ -84,10 +85,17 @@ getBusStopJSON (LatLon lat lon) radius = do
     simpleHTTP request >>= getResponseBody
 
 -- Makes a JSON request using the user location and radius and stores the result of the request into a JSON file called "stops.json"
-storeBusStopList :: IO()
-storeBusStopList = do
-    jsonString <- getBusStopJSON userLocation 2000
+storeBusStopList :: LatLon -> Radius -> IO()
+storeBusStopList latLon radius = do
+    jsonString <- getBusStopJSON latLon radius 
     B.writeFile "stops.json" jsonString
+
+-- Gets the bus stops from file
+getBusStopsFromFile :: IO (Maybe [BusStop])
+getBusStopsFromFile = do
+    byteString <- B.readFile "stops.json"
+    let busStops = decode byteString :: Maybe [BusStop]
+    return busStops
 
 -- Converts between a Maybe [BusStop] to a [BusStop]
 checkBusStops :: Maybe [BusStop] -> [BusStop]
