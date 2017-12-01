@@ -50,6 +50,23 @@ instance FromJSON BusStop where
 
 instance ToJSON BusStop
 
+type Name = String
+data Location = Location Name LatLon
+
+locationListAsString :: [Location] -> Int -> String
+locationListAsString [] _ = ""
+locationListAsString ((Location name _):xs) index = "(" ++ (show index) ++ ") " ++ name
+                                            ++ "\n" ++ locationListAsString xs (index+1)
+
+knownLocations :: [Location]
+knownLocations = [
+        Location "ICICS" (LatLon 49.260986 (-123.248064)),
+        Location "City Hall" (LatLon 49.263248 (-123.114934))
+    ]
+
+-- instance Show [Location] where
+--     show (location:xs) = (show location) ++ "\n"
+
 getBusStopJSON :: LatLon -> Radius -> IO B.ByteString
 getBusStopJSON (LatLon lat lon) radius = do
     -- TODO: What if this fails?
