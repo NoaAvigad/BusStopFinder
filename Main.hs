@@ -4,6 +4,7 @@ import TranslinkAPI
 import GeoLocation
 import Logo
 
+import System.IO
 import Text.Read
 import Data.Maybe
 import Data.Typeable
@@ -62,6 +63,7 @@ queryBusStops = do
 
 main :: IO ()
 main = do
+    hSetBuffering stdout NoBuffering
     putStrLn translinkLogo
     putStrLn("What would you like to do?:")
     putStrLn("(1) Search for bus stops")
