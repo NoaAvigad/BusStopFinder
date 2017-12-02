@@ -4,6 +4,7 @@ import TranslinkAPI
 import GeoLocation
 import Logo
 
+import System.IO
 import Text.Read
 import Data.Maybe
 import Data.Typeable
@@ -49,6 +50,7 @@ lookupBusStops = do
         let radius = fromJust (readMaybe radiusStr :: Maybe Float)
         if isJust (readMaybe radiusStr :: Maybe Float) && radius < 2000 then (do
             storeBusStopList currLatLon radius
+            putStrLn "Saved requested bus stops, run me again to query on this search!"
             main)
         else (do
             putStrLn "Invalid radius!"
@@ -65,6 +67,7 @@ queryBusStops = do
 
 main :: IO ()
 main = do
+    hSetBuffering stdout NoBuffering
     putStrLn translinkLogo
     putStrLn("What would you like to do?:")
     putStrLn("(1) Search for bus stops")
