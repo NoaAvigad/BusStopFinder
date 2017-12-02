@@ -44,7 +44,7 @@ lookupBusStops = do
     if isNothing maybeCurrLatLon then
         putStrLn "Sorry, invalid choice!"
     else do
-        putStr "What radius do you want to look for bus stops in? (< 2000 due to Translink API restrictions): "
+        putStrLn "What radius do you want to look for bus stops in? (< 2000 due to Translink API restrictions): "
         radiusStr <- getLine
         let radius = fromJust (readMaybe radiusStr :: Maybe Float)
         if isJust (readMaybe radiusStr :: Maybe Float) && radius < 2000 then
