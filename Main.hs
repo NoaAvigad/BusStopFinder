@@ -44,18 +44,18 @@ lookupBusStops = do
     let currLatLon = fromJust maybeCurrLatLon
     if isNothing maybeCurrLatLon then (do
         putStrLn "Sorry, invalid choice!"
-        main)
+        mainMenu)
     else do
         putStrLn "What radius do you want to look for bus stops in? (< 2000 due to Translink API restrictions): "
         radiusStr <- getLine
         let radius = fromJust (readMaybe radiusStr :: Maybe Float)
         if isJust (readMaybe radiusStr :: Maybe Float) && radius < 2000 then (do
             storeBusStopList currLatLon radius
-            putStrLn "Saved requested bus stops, run me again to query on this search!"
-            main)
+            putStrLn "Saved requested bus stops!"
+            mainMenu)
         else (do
             putStrLn "Invalid radius!"
-            main)
+            mainMenu)
 
 queryBusStops :: IO ()
 queryBusStops = do
@@ -64,12 +64,11 @@ queryBusStops = do
     -- if it exists, the give the user some options to query on it
     -- otherwise, print an error
     putStrLn "This operation isn't supported yet!"
-    main
+    mainMenu
 
-main :: IO ()
-main = do
-    hSetBuffering stdout NoBuffering
-    putStrLn translinkLogo
+mainMenu :: IO ()
+mainMenu = do
+    putStrLn("")
     putStrLn("What would you like to do?:")
     putStrLn("(1) Search for bus stops")
     putStrLn("(2) Query on last search")
@@ -80,3 +79,9 @@ main = do
         queryBusStops
     else 
         putStrLn "Invalid Choice!"
+
+main :: IO ()
+main = do
+    hSetBuffering stdout NoBuffering
+    putStrLn translinkLogo
+    mainMenu
