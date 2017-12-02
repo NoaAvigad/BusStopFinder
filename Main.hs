@@ -63,8 +63,20 @@ queryBusStops = do
     -- Check if "stops.json" exists
     -- if it exists, the give the user some options to query on it
     -- otherwise, print an error
-    putStrLn "This operation isn't supported yet!"
-    mainMenu
+    busStopsFromFile <- getBusStopsFromFile
+    let busStopList = checkBusStops busStopsFromFile
+    if length busStopList == 0 then do
+        putStrLn "You have not loaded any bus stops! Please run a search before querying."
+        mainMenu
+    else do
+        putStrLn "Please enter a stop number to query:"
+        stopNumberStr <- getLine
+        let busStopNumber = fromJust (readMaybe stopNumberStr :: Maybe Int)
+        if isJust (readMaybe stopNumberStr :: Maybe Int) then do
+            queryBusStopByStopNumber "StopNo" busStopNumber
+        else do
+            putStrLn "Invalid bus stop number!"
+            mainMenu
 
 mainMenu :: IO ()
 mainMenu = do
