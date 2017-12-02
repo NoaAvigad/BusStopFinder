@@ -73,7 +73,9 @@ queryBusStops = do
         stopNumberStr <- getLine
         let busStopNumber = fromJust (readMaybe stopNumberStr :: Maybe Int)
         if isJust (readMaybe stopNumberStr :: Maybe Int) then do
-            queryBusStopByStopNumber "StopNo" busStopNumber
+            queriedStops <- queryBusStopByStopNumber "StopNo" busStopNumber
+            putStrLn (show queriedStops)
+            mainMenu
         else do
             putStrLn "Invalid bus stop number!"
             mainMenu
@@ -84,11 +86,14 @@ mainMenu = do
     putStrLn("What would you like to do?:")
     putStrLn("(1) Search for bus stops")
     putStrLn("(2) Query on last search")
+    putStrLn("(3) Exit")
     choice <- getLine
     if choice == "1" then
         lookupBusStops
     else if choice == "2" then
         queryBusStops
+    else if choice == "3" then 
+        return ()
     else 
         putStrLn "Invalid Choice!"
 

@@ -109,13 +109,13 @@ queryBusStop stop f paramVal
     | otherwise = False
 
 -- Gets all of the stops with the given stop number and prints the list of stops to the screen
-queryBusStopByStopNumber :: p -> Int -> IO()
+queryBusStopByStopNumber :: p -> Int -> IO([BusStop])
 queryBusStopByStopNumber paramName paramVal = do
     byteString <- B.readFile "stops.json"
     let busStops = decode byteString :: Maybe [BusStop]
     let busStoplist = checkBusStops busStops
     let val = foldr (\x acc -> if (stopNumber x == paramVal) then x : acc else acc) [] busStoplist
-    putStrLn (show val)
+    return val
 
 -- temporary solution until we implement fetching of current location
 userLocation = LatLon 49.279171 (-122.919808)
