@@ -106,8 +106,15 @@ queryBusStopByRoute :: [BusStop] -> IO ()
 queryBusStopByRoute busStopList = do
     putStrLn "Please enter a route to query:"
     routeName <- getLine
-    let queriedStops = foldr (\x acc -> if (existsInList routeName (splitOn ", " (unpack (routes x)))) then x : acc else acc) [] busStopList
+    let queriedStops = foldr (\x acc -> if (existsInList routeName (Prelude.map stripLeadingZeros (splitOn ", " (unpack (routes x))))) then x : acc else acc) [] busStopList
     putStrLn (show queriedStops) 
+
+-- Removes leading 0's
+stripLeadingZeros :: String -> String 
+stripLeadingZeros [] = []
+stripLeadingZeros (x:xs)
+    | x == '0' = stripLeadingZeros xs
+    | otherwise  = (x:xs)
 
 -- Checks if an item exists within a list
 existsInList :: Eq a => a -> [a] -> Bool
