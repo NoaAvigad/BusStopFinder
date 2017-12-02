@@ -57,10 +57,10 @@ lookupBusStops = do
             putStrLn "Invalid radius!"
             mainMenu)
 
+-- Generic function to perform some IO action with the list of bus stops once it is retrieved and error checked
 performBusStopAction :: ([BusStop] -> IO ()) -> IO ()
 performBusStopAction ioAction = do
-    busStopsFromFile <- getBusStopsFromFile
-    let busStopList = checkBusStops busStopsFromFile
+    busStopList <- getBusStopsFromFile
     if length busStopList == 0 then do
         putStrLn "You have not loaded any bus stops! Please run a search before querying."
         mainMenu
@@ -68,17 +68,19 @@ performBusStopAction ioAction = do
         ioAction busStopList
         mainMenu
 
+-- Given a list of bus stops performs a query on them
 queryBusStops :: [BusStop] -> IO ()
 queryBusStops busStopList = do
     putStrLn "Please enter a stop number to query:"
     stopNumberStr <- getLine
     let busStopNumber = fromJust (readMaybe stopNumberStr :: Maybe Int)
     if isJust (readMaybe stopNumberStr :: Maybe Int) then do
-        queriedStops <- queryBusStopByStopNumber "StopNo" busStopNumber
+        let queriedStops = foldr (\x acc -> if (stopNumber x == busStopNumber) then x : acc else acc) [] busStopList
         putStrLn (show queriedStops)
     else do
         putStrLn "Invalid bus stop number!"
 
+-- Given a list of bus stops prints out the bus stops
 listBusStops :: [BusStop] -> IO ()
 listBusStops busStopList = do
     putStrLn (show busStopList)

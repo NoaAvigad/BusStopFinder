@@ -5,7 +5,7 @@ module TranslinkAPI where
 import Data.Maybe
 import Data.Aeson
 import Data.Aeson.Types
-import Data.Text hiding (foldr)
+import Data.Text
 import Network.HTTP
 import Network.HTTP.Base
 import Network.HTTP.Headers
@@ -95,31 +95,17 @@ storeBusStopList latLon radius = do
     B.writeFile "stops.json" jsonString
 
 -- Gets the bus stops from file
-getBusStopsFromFile :: IO (Maybe [BusStop])
+getBusStopsFromFile :: IO ([BusStop])
 getBusStopsFromFile = do
     byteString <- B.readFile "stops.json"
     let busStops = decode byteString :: Maybe [BusStop]
-    return busStops
+    return (checkBusStops busStops)
 
 -- Converts between a Maybe [BusStop] to a [BusStop]
 checkBusStops :: Maybe [BusStop] -> [BusStop]
 checkBusStops busStops 
     | isJust busStops = fromJust busStops
     | otherwise = []
-
-queryBusStop :: (Eq t) => BusStop -> (BusStop -> t) -> t -> Bool
-queryBusStop stop f paramVal
-    | f stop == paramVal = True
-    | otherwise = False
-
--- Gets all of the stops with the given stop number and prints the list of stops to the screen
-queryBusStopByStopNumber :: p -> Int -> IO([BusStop])
-queryBusStopByStopNumber paramName paramVal = do
-    byteString <- B.readFile "stops.json"
-    let busStops = decode byteString :: Maybe [BusStop]
-    let busStoplist = checkBusStops busStops
-    let val = foldr (\x acc -> if (stopNumber x == paramVal) then x : acc else acc) [] busStoplist
-    return val
 
 -- temporary solution until we implement fetching of current location
 userLocation = LatLon 49.279171 (-122.919808)
