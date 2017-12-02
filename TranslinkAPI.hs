@@ -32,7 +32,11 @@ data BusStop =
         , wheelChairAccess :: Int
         , distance :: Float
         , routes :: Text
-    } deriving (Show, Generic)
+    } deriving (Generic)
+
+instance Show BusStop where
+    show (BusStop stopNumber name bayNumber city onStreet atStreet latitude longitude wheelChairAccess distance routes) = 
+         "\n\tBusStop: " ++ "\n\t\tStop Number: " ++ show stopNumber ++ "\n\t\tName: " ++ show name ++ "\n\t\tOn Street: " ++ show onStreet ++  "\n\t\tRoutes: " ++ show routes
 
 -- instance Show BusStop where
 --     show busStop = show (name busStop)

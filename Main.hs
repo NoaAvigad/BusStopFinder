@@ -80,19 +80,33 @@ queryBusStops = do
             putStrLn "Invalid bus stop number!"
             mainMenu
 
+listBusStops :: IO ()
+listBusStops = do
+    busStopsFromFile <- getBusStopsFromFile
+    let busStopList = checkBusStops busStopsFromFile
+    if length busStopList == 0 then do
+        putStrLn "You have not loaded any bus stops! Please run a search before querying."
+        mainMenu
+    else do
+        putStrLn (show busStopList)
+        mainMenu
+
 mainMenu :: IO ()
 mainMenu = do
     putStrLn("")
     putStrLn("What would you like to do?:")
     putStrLn("(1) Search for bus stops")
     putStrLn("(2) Query on last search")
-    putStrLn("(3) Exit")
+    putStrLn("(3) List all stops from last search")
+    putStrLn("(4) Exit")
     choice <- getLine
     if choice == "1" then
         lookupBusStops
     else if choice == "2" then
         queryBusStops
     else if choice == "3" then 
+        listBusStops
+    else if choice == "4" then 
         return ()
     else 
         putStrLn "Invalid Choice!"
