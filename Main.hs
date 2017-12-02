@@ -57,39 +57,31 @@ lookupBusStops = do
             putStrLn "Invalid radius!"
             mainMenu)
 
-queryBusStops :: IO ()
-queryBusStops = do
-    -- TODO:
-    -- Check if "stops.json" exists
-    -- if it exists, the give the user some options to query on it
-    -- otherwise, print an error
+performBusStopAction :: ([BusStop] -> IO ()) -> IO ()
+performBusStopAction ioAction = do
     busStopsFromFile <- getBusStopsFromFile
     let busStopList = checkBusStops busStopsFromFile
     if length busStopList == 0 then do
         putStrLn "You have not loaded any bus stops! Please run a search before querying."
         mainMenu
     else do
-        putStrLn "Please enter a stop number to query:"
-        stopNumberStr <- getLine
-        let busStopNumber = fromJust (readMaybe stopNumberStr :: Maybe Int)
-        if isJust (readMaybe stopNumberStr :: Maybe Int) then do
-            queriedStops <- queryBusStopByStopNumber "StopNo" busStopNumber
-            putStrLn (show queriedStops)
-            mainMenu
-        else do
-            putStrLn "Invalid bus stop number!"
-            mainMenu
+        ioAction busStopList
+        mainMenu
 
-listBusStops :: IO ()
-listBusStops = do
-    busStopsFromFile <- getBusStopsFromFile
-    let busStopList = checkBusStops busStopsFromFile
-    if length busStopList == 0 then do
-        putStrLn "You have not loaded any bus stops! Please run a search before querying."
-        mainMenu
+queryBusStops :: [BusStop] -> IO ()
+queryBusStops busStopList = do
+    putStrLn "Please enter a stop number to query:"
+    stopNumberStr <- getLine
+    let busStopNumber = fromJust (readMaybe stopNumberStr :: Maybe Int)
+    if isJust (readMaybe stopNumberStr :: Maybe Int) then do
+        queriedStops <- queryBusStopByStopNumber "StopNo" busStopNumber
+        putStrLn (show queriedStops)
     else do
-        putStrLn (show busStopList)
-        mainMenu
+        putStrLn "Invalid bus stop number!"
+
+listBusStops :: [BusStop] -> IO ()
+listBusStops busStopList = do
+    putStrLn (show busStopList)
 
 mainMenu :: IO ()
 mainMenu = do
@@ -103,9 +95,9 @@ mainMenu = do
     if choice == "1" then
         lookupBusStops
     else if choice == "2" then
-        queryBusStops
+        performBusStopAction queryBusStops
     else if choice == "3" then 
-        listBusStops
+        performBusStopAction listBusStops
     else if choice == "4" then 
         return ()
     else 
