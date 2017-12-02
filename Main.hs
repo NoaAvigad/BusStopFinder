@@ -42,8 +42,9 @@ lookupBusStops = do
     putStrLn "Where are you?"
     maybeCurrLatLon <- getCurrentLatLonFromUser
     let currLatLon = fromJust maybeCurrLatLon
-    if isNothing maybeCurrLatLon then
+    if isNothing maybeCurrLatLon then (do
         putStrLn "Sorry, invalid choice!"
+        main)
     else do
         putStrLn "What radius do you want to look for bus stops in? (< 2000 due to Translink API restrictions): "
         radiusStr <- getLine
