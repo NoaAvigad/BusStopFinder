@@ -48,8 +48,9 @@ lookupBusStops = do
         putStrLn "What radius do you want to look for bus stops in? (< 2000 due to Translink API restrictions): "
         radiusStr <- getLine
         let radius = fromJust (readMaybe radiusStr :: Maybe Float)
-        if isJust (readMaybe radiusStr :: Maybe Float) && radius < 2000 then
+        if isJust (readMaybe radiusStr :: Maybe Float) && radius < 2000 then do
             storeBusStopList currLatLon radius
+            putStrLn "Saved requested bus stops, run me again to query on this search!"
         else 
             putStrLn "Invalid radius!"
 
