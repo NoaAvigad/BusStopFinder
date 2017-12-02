@@ -24,6 +24,7 @@ executable BusStopFinder
     base >=4.8 && <4.11, 
     text,
     bytestring >=0.10 && <0.11, 
+    split,
     http-conduit,
     HTTP,
     network-uri,

@@ -8,6 +8,8 @@ import System.IO
 import Text.Read
 import Data.Maybe
 import Data.Typeable
+import Data.Text hiding (splitOn, foldr, length)
+import Data.List.Split
 
 locationListAsString :: [Location] -> Int -> String
 locationListAsString [] _ = ""
@@ -68,9 +70,28 @@ performBusStopAction ioAction = do
         ioAction busStopList
         mainMenu
 
+-- Given a list of bus stops prints out the bus stops
+listBusStops :: [BusStop] -> IO ()
+listBusStops busStopList = do
+    putStrLn (show busStopList)
+
 -- Given a list of bus stops performs a query on them
 queryBusStops :: [BusStop] -> IO ()
 queryBusStops busStopList = do
+    putStrLn "What kind of query would you like to perform?"
+    putStrLn "(1) By stop number"
+    putStrLn "(2) By route"
+    choice <- getLine
+    if choice == "1" then
+        queryBusStopByStopNumber busStopList
+    else if choice == "2" then
+        queryBusStopByRoute busStopList
+    else 
+        putStrLn "Invalid Choice!"
+
+-- Queries the list of bus stops by the specific bus stop number
+queryBusStopByStopNumber :: [BusStop] -> IO ()
+queryBusStopByStopNumber busStopList = do
     putStrLn "Please enter a stop number to query:"
     stopNumberStr <- getLine
     let busStopNumber = fromJust (readMaybe stopNumberStr :: Maybe Int)
@@ -80,10 +101,20 @@ queryBusStops busStopList = do
     else do
         putStrLn "Invalid bus stop number!"
 
--- Given a list of bus stops prints out the bus stops
-listBusStops :: [BusStop] -> IO ()
-listBusStops busStopList = do
-    putStrLn (show busStopList)
+-- Queries the list of bus stops by the route 
+queryBusStopByRoute :: [BusStop] -> IO ()
+queryBusStopByRoute busStopList = do
+    putStrLn "Please enter a route to query:"
+    routeName <- getLine
+    let queriedStops = foldr (\x acc -> if (existsInList routeName (splitOn ", " (unpack (routes x)))) then x : acc else acc) [] busStopList
+    putStrLn (show queriedStops) 
+
+-- Checks if an item exists within a list
+existsInList :: Eq a => a -> [a] -> Bool
+existsInList _ [] = False
+existsInList item (h:t) 
+    | h == item = True
+    | otherwise = existsInList item t
 
 mainMenu :: IO ()
 mainMenu = do
